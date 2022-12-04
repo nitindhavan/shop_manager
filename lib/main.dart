@@ -1,14 +1,27 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shop_management/models/UserModel.dart';
+import 'package:shop_management/screens/home_screen.dart';
 import 'package:shop_management/screens/login_page.dart';
+import 'package:shop_management/screens/register_page.dart';
 
-void main() {
+import 'DefaultFirebaseOptions.dart';
+
+void main() async{
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     systemNavigationBarColor: Colors.indigo, // navigation bar color
     statusBarColor: Colors.indigo, // status bar color
   ));
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -37,14 +50,15 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
+    navigate();
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             GestureDetector(
-              onTap: (){
-                  Navigator.push(context, new MaterialPageRoute(builder: (context)=> LoginPage()));
+              onTap: () async {
+
               },
               child: Container(
                 margin: EdgeInsets.only(top: 200),
@@ -57,10 +71,28 @@ class _MyHomePageState extends State<MyHomePage> {
             Padding(
               padding: const EdgeInsets.all(32.0),
               child: Image.asset('shop_icon.png'),
-            )
+            ),
           ],
         ),
       ),
     );
+  }
+  navigate()  {
+    var auth=FirebaseAuth.instance;
+    if(auth.currentUser==null) {
+      Navigator.push(context,
+          new MaterialPageRoute(builder: (context) => LoginPage()));
+    }else{
+      FirebaseDatabase.instance.ref("users").child(FirebaseAuth.instance.currentUser!.uid).once().then((value) {
+        if(value.snapshot.value==null){
+          Navigator.push(context, MaterialPageRoute(builder: (context)=> RegisterPage()));
+        }else {
+          UserModel model = UserModel.fromMap(value.snapshot.value as Map);
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => HomePage(userModel: model,)));
+        }
+      });
+
+    }
   }
 }

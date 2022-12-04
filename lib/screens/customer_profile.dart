@@ -1,12 +1,17 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:shop_management/models/BillModel.dart';
+import 'package:shop_management/models/CustomerModel.dart';
 import 'package:shop_management/screens/add_bill.dart';
 import 'package:shop_management/screens/bill_screen.dart';
 import 'package:shop_management/screens/edit_customer.dart';
 import 'package:shop_management/screens/edit_profile.dart';
 import 'package:shop_management/screens/home_screen.dart';
 class CustomerProfilePage extends StatefulWidget {
-  const CustomerProfilePage({super.key});
+  const CustomerProfilePage({super.key, required this.model});
 
+  final CustomerModel model;
 
   @override
   State<CustomerProfilePage> createState() => _CustomerProfilePageState();
@@ -32,7 +37,7 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
                     ),
                   ),
                   SizedBox(width: 16,),
-                  GestureDetector(onTap:()=> Navigator.push(context, MaterialPageRoute(builder: (context)=> EditCustomerPage())),child: Icon(Icons.edit)),
+                  GestureDetector(onTap:()=> Navigator.push(context, MaterialPageRoute(builder: (context)=> EditCustomerPage(model : widget.model))),child: Icon(Icons.edit)),
                 ],
               ),
               SizedBox(height: 50,),
@@ -48,47 +53,86 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
                       fontWeight: FontWeight.w900),
                 ),
               ),
-              Container(
-                margin: EdgeInsets.all(16),
-                height: 200,
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade200,
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          SizedBox(height: 16,),
-                          Text('Credit',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
-                          Text('2,00,000',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24),),
-                          Text('Cash',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
-                          Text('2,00,000',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24),),
-                          SizedBox(height: 16,),
-                        ],
-                      ),
+              FutureBuilder(
+                builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                  if (!snapshot.hasData)
+                    return Center(child: CircularProgressIndicator(),);
+                  int creditTotal = 0;
+                  int cashTotal = 0;
+
+                  for (DataSnapshot snap in snapshot.data!.snapshot.children) {
+                    BillModel model = BillModel.fromMap(snap.value as Map);
+                    if (model.type == 'Cash') {
+                      cashTotal += model.total;
+                    } else {
+                      creditTotal += model.total;
+                    }
+                  }
+                  return Container(
+                    margin: EdgeInsets.all(16),
+                    height: 200,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade200,
+                      borderRadius: BorderRadius.circular(30),
                     ),
-                    Container(
-                      color: Colors.white,
-                      width: 2,
-                      margin: EdgeInsets.only(top: 16,bottom: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .spaceAround,
+                                  children: [
+                                    SizedBox(height: 16,),
+                                    Text('Credit', style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16),),
+                                    Text('$creditTotal', style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 24),),
+                                    Text('Cash',
+                                      style: TextStyle(color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16),),
+                                    Text('$cashTotal', style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 24),),
+                                    SizedBox(height: 16,),
+                                  ],
+                                ),
+                              ),
+                        Container(
+                          color: Colors.white,
+                          width: 2,
+                          margin: EdgeInsets.only(top: 16, bottom: 16),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Text('Total', style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16),),
+                              Text('${creditTotal+cashTotal}', style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 24),),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Text('Total',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
-                          Text('4,00,000',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24),),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                }, future: FirebaseDatabase.instance.ref('bills')
+                  .child(FirebaseAuth.instance.currentUser!.uid)
+                  .orderByChild('userID').equalTo(widget.model.UID)
+                  .once()
               ),
               Container(
                 padding: EdgeInsets.all(16),
@@ -103,6 +147,7 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
               Container(
                 margin: EdgeInsets.all(16),
                 height: 200,
+                width: double.infinity,
                 decoration: BoxDecoration(
                   color: Colors.blue.shade200,
                   borderRadius: BorderRadius.circular(30),
@@ -113,9 +158,9 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Text('Name:\nNitin Dhavan',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
-                      Text('Phone:\n+919325508604',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
-                      Text('Address:\nAt post Nighoj Taluka Parner District Ahmednagar',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
+                      Text('Name:\n${widget.model.name}',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
+                      Text('Phone:\n${widget.model.phone}',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
+                      Text('Address:\n${widget.model.address}',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
                     ],
                   ),
                 ),
@@ -127,7 +172,7 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
                   Expanded(
                     child: GestureDetector(
                       onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>BillPage()));
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>BillPage(uid: widget.model.UID,type:'customers',)));
                       },
                       child: Container(
                         height: 50,
@@ -144,7 +189,7 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
                   Expanded(
                     child: GestureDetector(
                       onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>AddBillPage()));
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>AddBillPage(uid: widget.model.UID,userType: 'customers',)));
                       },
                       child: Container(
                         height: 50,

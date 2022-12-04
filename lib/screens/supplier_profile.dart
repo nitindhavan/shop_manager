@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:shop_management/models/SupplierModel.dart';
 import 'package:shop_management/screens/add_bill.dart';
 import 'package:shop_management/screens/bill_screen.dart';
 import 'package:shop_management/screens/edit_profile.dart';
 import 'package:shop_management/screens/edit_supplier.dart';
 import 'package:shop_management/screens/home_screen.dart';
 class SupplierProfilePage extends StatefulWidget {
-  const SupplierProfilePage({super.key});
-
-
+  SupplierProfilePage({super.key, required this.model});
+  final SupplierModel model;
   @override
   State<SupplierProfilePage> createState() => _SupplierProfilePageState();
 }
@@ -32,7 +32,7 @@ class _SupplierProfilePageState extends State<SupplierProfilePage> {
                     ),
                   ),
                   SizedBox(width: 16,),
-                  GestureDetector(onTap:()=> Navigator.push(context, MaterialPageRoute(builder: (context)=> EditSupplierPage())),child: Icon(Icons.edit)),
+                  GestureDetector(onTap:()=> Navigator.push(context, MaterialPageRoute(builder: (context)=> EditSupplierPage(model: widget.model,))),child: Icon(Icons.edit)),
                 ],
               ),
               SizedBox(height: 50,),
@@ -109,14 +109,17 @@ class _SupplierProfilePageState extends State<SupplierProfilePage> {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Text('Name:\nNitin Dhavan',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
-                      Text('Phone:\n+919325508604',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
-                      Text('Address:\nAt post Nighoj Taluka Parner District Ahmednagar',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
-                    ],
+                  child: Container(
+                    width: double.infinity,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Text('Name:\n${widget.model.name}',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
+                        Text('Phone:\n${widget.model.phone}',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
+                        Text('Address:\n${widget.model.address}',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -127,7 +130,7 @@ class _SupplierProfilePageState extends State<SupplierProfilePage> {
                   Expanded(
                     child: GestureDetector(
                       onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>BillPage()));
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>BillPage(uid: widget.model.UID,type: 'suppliers',)));
                       },
                       child: Container(
                         height: 50,
@@ -144,7 +147,7 @@ class _SupplierProfilePageState extends State<SupplierProfilePage> {
                   Expanded(
                     child: GestureDetector(
                       onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>AddBillPage()));
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>AddBillPage(uid: widget.model.UID,userType: 'suppliers',)));
                       },
                       child: Container(
                         height: 50,

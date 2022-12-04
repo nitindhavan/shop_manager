@@ -1,4 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:shop_management/main.dart';
+import 'package:shop_management/models/UserModel.dart';
 import 'package:shop_management/screens/home_screen.dart';
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -9,7 +13,8 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-
+  TextEditingController name=TextEditingController();
+  TextEditingController shopname=TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,7 +45,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     alignment: Alignment.centerLeft,
-                    child: TextField(textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
+                    child: TextField(controller: name,textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Enter Your Name',
                         hintStyle: TextStyle(color: Colors.white)
@@ -56,7 +61,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     alignment: Alignment.centerLeft,
-                    child: TextField(textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
+                    child: TextField(controller: shopname,textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Enter Your Shop Name',
                         hintStyle: TextStyle(color: Colors.white)
@@ -68,7 +73,13 @@ class _RegisterPageState extends State<RegisterPage> {
 
               GestureDetector(
                 onTap: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage()));
+                  if(name.text.isNotEmpty && shopname.text.isNotEmpty) {
+                    UserModel model = UserModel(
+                        UID: FirebaseAuth.instance.currentUser!.uid,
+                        name: name.text,
+                        shopName: shopname.text);
+                    FirebaseDatabase.instance.ref("users").child(model.UID).set(model.toMap()).then((value) => Navigator.push(context, MaterialPageRoute(builder: (context)=>MyHomePage(title: "title"))));
+                  }
                 },
                 child: Container(
                   height: 50,

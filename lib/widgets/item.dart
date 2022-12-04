@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 
 class Item extends StatefulWidget {
-  const Item({Key? key}) : super(key: key);
-
+  const Item({Key? key,required this.name,required this.quantity,required this.price}) : super(key: key);
+  final TextEditingController name;
+  final TextEditingController quantity;
+  final TextEditingController price;
   @override
   State<Item> createState() => _ItemState();
 }
 
 class _ItemState extends State<Item> {
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -22,7 +25,7 @@ class _ItemState extends State<Item> {
             borderRadius: BorderRadius.circular(16),
           ),
           alignment: Alignment.center,
-          child: TextField(textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
+          child: TextField(controller: widget.name,textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
             border: InputBorder.none,
             hintText: 'Enter Item Name',
             hintStyle: TextStyle(color: Colors.white)
@@ -41,7 +44,7 @@ class _ItemState extends State<Item> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 alignment: Alignment.center,
-                child: TextField(textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
+                child: TextField(controller: widget.quantity,textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Quantity',
                     hintStyle: TextStyle(color: Colors.white)
@@ -59,7 +62,7 @@ class _ItemState extends State<Item> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 alignment: Alignment.center,
-                child: TextField(textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
+                child: TextField(controller: widget.price,textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: 'Rate',
                     hintStyle: TextStyle(color: Colors.white)

@@ -4,8 +4,11 @@ import 'package:shop_management/screens/pricing_screen.dart';
 import 'package:shop_management/screens/profile_screen.dart';
 import 'package:shop_management/screens/supplier_screen.dart';
 
+import '../models/UserModel.dart';
+
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  HomePage({super.key,required this.userModel});
+  final UserModel userModel;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -34,7 +37,7 @@ class _HomePageState extends State<HomePage> {
                           fontWeight: FontWeight.w900),
                     ),
                     GestureDetector(
-                        onTap: ()=> Navigator.push(context, MaterialPageRoute(builder: (context)=> ProfilePage())),
+                        onTap: ()=> Navigator.push(context, MaterialPageRoute(builder: (context)=> ProfilePage(model : widget.userModel))),
                         child: Icon(Icons.person))
                   ],
                 ),

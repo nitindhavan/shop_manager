@@ -1,12 +1,20 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:shop_management/models/ProductModel.dart';
 import 'package:shop_management/screens/home_screen.dart';
+import 'package:shop_management/screens/pricing_screen.dart';
 class RegisterProductPage extends StatefulWidget {
   const RegisterProductPage({super.key});
+
   @override
   State<RegisterProductPage> createState() => _RegisterProductPageState();
 }
 
 class _RegisterProductPageState extends State<RegisterProductPage> {
+
+  var name=TextEditingController();
+  var price=TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +46,7 @@ class _RegisterProductPageState extends State<RegisterProductPage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     alignment: Alignment.centerLeft,
-                    child: TextField(textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
+                    child: TextField(controller: name,textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Enter Product Name',
                         hintStyle: TextStyle(color: Colors.white)
@@ -54,7 +62,7 @@ class _RegisterProductPageState extends State<RegisterProductPage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     alignment: Alignment.centerLeft,
-                    child: TextField(textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
+                    child: TextField(controller: price,textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Enter Product Price',
                         hintStyle: TextStyle(color: Colors.white)
@@ -65,7 +73,11 @@ class _RegisterProductPageState extends State<RegisterProductPage> {
               const SizedBox(height: 50,),
               GestureDetector(
                 onTap: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage()));
+                  var ref=FirebaseDatabase.instance.ref("products").child(FirebaseAuth.instance.currentUser!.uid);
+                  String key=ref.push().key!;
+                  ref.child(key).set(ProductModel(key, name.text, price.text).toMap()).then((value){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>PricingPage()));
+                  });
                 },
                 child: Container(
                   height: 50,

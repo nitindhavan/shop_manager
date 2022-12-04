@@ -1,4 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:shop_management/models/ProductModel.dart';
 import 'package:shop_management/screens/add_product_screen.dart';
 
 class PricingPage extends StatefulWidget {
@@ -9,8 +12,14 @@ class PricingPage extends StatefulWidget {
 }
 
 class _PricingPageState extends State<PricingPage> {
+  var searchController=TextEditingController();
   @override
   Widget build(BuildContext context) {
+    searchController.addListener(() {
+      setState(() {
+        this;
+      });
+    });
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -39,7 +48,7 @@ class _PricingPageState extends State<PricingPage> {
               child: Row(
                 children: [
                   Expanded(
-                    child: TextField(style: TextStyle(fontWeight: FontWeight.bold),
+                    child: TextField(controller: searchController,style: TextStyle(fontWeight: FontWeight.bold),
                       decoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: 'Search...',
@@ -50,27 +59,51 @@ class _PricingPageState extends State<PricingPage> {
                 ],
               ),
             ),
-            Expanded(
-              child: ListView.builder(itemBuilder: (BuildContext context, int index) {
-                return Container(
-                  height: 60,
-                  padding: EdgeInsets.only(left: 16,right: 16),
-                  width: double.infinity,
-                  margin: EdgeInsets.only(left: 16,right: 16,top: 8,bottom: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade200,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  alignment: Alignment.centerLeft,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Product Number $index',textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),),
-                      Text('\$100',textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),),
-                    ],
-                  ),
+            FutureBuilder(
+              builder: (BuildContext context, AsyncSnapshot<DatabaseEvent> snapshot) {
+                if(!snapshot.hasData) return Expanded(child: Center(child: Text('No products'),));
+                List<ProductModel> productList=[];
+                for(DataSnapshot snap in snapshot.data!.snapshot.children){
+                  ProductModel model =ProductModel.fromMap(snap.value as Map);
+                  productList.add(model);
+                }
+                return Expanded(
+                  child: ListView.builder(
+                    key: Key(searchController.text),
+                    itemBuilder: (BuildContext context, int index) {
+                      if(!productList[index].name.toLowerCase().contains(searchController.text)) return SizedBox();
+                      return GestureDetector(
+                        child: Container(
+                          height: 60,
+                          padding: EdgeInsets.only(left: 16),
+                          width: double.infinity,
+                          margin: EdgeInsets.only(
+                              left: 16, right: 16, top: 8, bottom: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade200,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(productList[index].name,
+                                textAlign: TextAlign.start,
+                                style: TextStyle(fontWeight: FontWeight.bold,
+                                    color: Colors.white),),
+                              Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text('₹ ${productList[index].price}',
+                                  textAlign: TextAlign.start,
+                                  style: TextStyle(fontWeight: FontWeight.bold,
+                                      color: Colors.white),),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }, itemCount: productList.length,),
                 );
-              },itemCount: 200,),
+              },future: FirebaseDatabase.instance.ref('products').child(FirebaseAuth.instance.currentUser!.uid).once(),
             ),
             GestureDetector(
               onTap: ()=> Navigator.push(context, MaterialPageRoute(builder: (context)=> RegisterProductPage())),

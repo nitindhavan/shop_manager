@@ -1,7 +1,11 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:shop_management/models/CustomerModel.dart';
+import 'package:shop_management/screens/customer_screen.dart';
 import 'package:shop_management/screens/home_screen.dart';
 class EditCustomerPage extends StatefulWidget {
-  const EditCustomerPage({super.key});
+  const EditCustomerPage({super.key, required this.model});
+  final CustomerModel model;
 
 
   @override
@@ -10,8 +14,16 @@ class EditCustomerPage extends StatefulWidget {
 
 class _EditCustomerPageState extends State<EditCustomerPage> {
 
+  var name=TextEditingController();
+  var phone=TextEditingController();
+  var address=TextEditingController();
+
   @override
   Widget build(BuildContext context) {
+    name.text=widget.model.name;
+    phone.text=widget.model.phone;
+    address.text=widget.model.address;
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -40,7 +52,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     alignment: Alignment.centerLeft,
-                    child: TextField(textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
+                    child: TextField(controller: name,textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Enter Customer Name',
                         hintStyle: TextStyle(color: Colors.white)
@@ -56,7 +68,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     alignment: Alignment.centerLeft,
-                    child: TextField(textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
+                    child: TextField(controller: phone,textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Enter Customer Phone',
                         hintStyle: TextStyle(color: Colors.white)
@@ -72,7 +84,7 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     alignment: Alignment.centerLeft,
-                    child: TextField(textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
+                    child: TextField(controller : address,textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Enter Customer Address',
                         hintStyle: TextStyle(color: Colors.white)
@@ -83,7 +95,15 @@ class _EditCustomerPageState extends State<EditCustomerPage> {
               const SizedBox(height: 50,),
               GestureDetector(
                 onTap: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage()));
+                  widget.model.phone=phone.text;
+                  widget.model.name=name.text;
+                  widget.model.address=address.text;
+
+                  FirebaseDatabase.instance.ref('customers').child(widget.model.UID).set(widget.model.toMap()).then((value){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=> CustomerPage()));
+                  });
+                  //TODO pending implementaion here
+                  // Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage()));
                 },
                 child: Container(
                   height: 50,

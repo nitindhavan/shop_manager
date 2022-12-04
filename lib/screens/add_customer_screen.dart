@@ -1,4 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:shop_management/models/CustomerModel.dart';
+import 'package:shop_management/screens/customer_screen.dart';
 import 'package:shop_management/screens/home_screen.dart';
 class RegisterCustomerPage extends StatefulWidget {
   const RegisterCustomerPage({super.key});
@@ -9,6 +13,10 @@ class RegisterCustomerPage extends StatefulWidget {
 }
 
 class _RegisterCustomerPageState extends State<RegisterCustomerPage> {
+
+  var name=TextEditingController();
+  var phone=TextEditingController();
+  var address=TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +48,7 @@ class _RegisterCustomerPageState extends State<RegisterCustomerPage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     alignment: Alignment.centerLeft,
-                    child: TextField(textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
+                    child: TextField(controller: name,textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Enter Customer Name',
                         hintStyle: TextStyle(color: Colors.white)
@@ -56,7 +64,7 @@ class _RegisterCustomerPageState extends State<RegisterCustomerPage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     alignment: Alignment.centerLeft,
-                    child: TextField(textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
+                    child: TextField(controller: phone,textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Enter Customer Phone',
                         hintStyle: TextStyle(color: Colors.white)
@@ -72,7 +80,7 @@ class _RegisterCustomerPageState extends State<RegisterCustomerPage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     alignment: Alignment.centerLeft,
-                    child: TextField(textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
+                    child: TextField(controller : address,textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Enter Customer Address',
                         hintStyle: TextStyle(color: Colors.white)
@@ -83,7 +91,12 @@ class _RegisterCustomerPageState extends State<RegisterCustomerPage> {
               const SizedBox(height: 50,),
               GestureDetector(
                 onTap: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage()));
+                  var ref=FirebaseDatabase.instance.ref("customers");
+                  String key=ref.push().key!;
+                  CustomerModel model=CustomerModel(key, name.text, phone.text, address.text, FirebaseAuth.instance.currentUser!.uid);
+                  ref.child(key).set(model.toMap()).then((value){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=> CustomerPage()));
+                  });
                 },
                 child: Container(
                   height: 50,

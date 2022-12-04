@@ -1,4 +1,4 @@
-package com.shop.shopmanagement.shop_management;
+package com.shop.shopmanagement;
 
 import io.flutter.embedding.android.FlutterActivity;
 

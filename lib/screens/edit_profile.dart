@@ -1,8 +1,11 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:shop_management/models/UserModel.dart';
 import 'package:shop_management/screens/home_screen.dart';
+import 'package:shop_management/screens/profile_screen.dart';
 class EditProfilePage extends StatefulWidget {
-  const EditProfilePage({super.key});
-
+  const EditProfilePage({super.key, required this.model});
+  final UserModel model;
 
   @override
   State<EditProfilePage> createState() => _EditProfilePageState();
@@ -10,8 +13,13 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
 
+  var name=TextEditingController();
+  var shopName=TextEditingController();
+
   @override
   Widget build(BuildContext context) {
+    name.text=widget.model.name;
+    shopName.text=widget.model.shopName;
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -40,7 +48,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     alignment: Alignment.centerLeft,
-                    child: TextField(textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
+                    child: TextField(controller: name,textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Enter Your Name',
                         hintStyle: TextStyle(color: Colors.white)
@@ -56,7 +64,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     alignment: Alignment.centerLeft,
-                    child: TextField(textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
+                    child: TextField(controller : shopName,textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Enter Your Shop Name',
                         hintStyle: TextStyle(color: Colors.white)
@@ -68,7 +76,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
               GestureDetector(
                 onTap: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage()));
+                  widget.model.name=name.text;
+                  widget.model.shopName=shopName.text;
+                  FirebaseDatabase.instance.ref("users").child(widget.model.UID).set(widget.model.toMap()).then((value){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=> ProfilePage(model: widget.model)));
+                  });
                 },
                 child: Container(
                   height: 50,

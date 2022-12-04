@@ -1,8 +1,13 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:shop_management/screens/home_screen.dart';
-class EditSupplierPage extends StatefulWidget {
-  const EditSupplierPage({super.key});
+import 'package:shop_management/screens/supplier_screen.dart';
 
+import '../models/SupplierModel.dart';
+class EditSupplierPage extends StatefulWidget {
+  EditSupplierPage({super.key,required this.model});
+
+  final SupplierModel model;
 
   @override
   State<EditSupplierPage> createState() => _EditSupplierPageState();
@@ -10,8 +15,15 @@ class EditSupplierPage extends StatefulWidget {
 
 class _EditSupplierPageState extends State<EditSupplierPage> {
 
+  var name=TextEditingController();
+  var phone=TextEditingController();
+  var address=TextEditingController();
+
   @override
   Widget build(BuildContext context) {
+    name.text=widget.model.name;
+    phone.text=widget.model.phone;
+    address.text=widget.model.address;
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -40,7 +52,7 @@ class _EditSupplierPageState extends State<EditSupplierPage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     alignment: Alignment.centerLeft,
-                    child: TextField(textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
+                    child: TextField(controller: name,textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Enter Supplier Name',
                         hintStyle: TextStyle(color: Colors.white)
@@ -56,7 +68,7 @@ class _EditSupplierPageState extends State<EditSupplierPage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     alignment: Alignment.centerLeft,
-                    child: TextField(textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
+                    child: TextField(controller: phone,textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Enter Supplier Phone',
                         hintStyle: TextStyle(color: Colors.white)
@@ -72,7 +84,7 @@ class _EditSupplierPageState extends State<EditSupplierPage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     alignment: Alignment.centerLeft,
-                    child: TextField(textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
+                    child: TextField(controller: address,textAlign: TextAlign.start,style: TextStyle(color: Colors.white),cursorColor: Colors.white,decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: 'Enter Supplier Address',
                         hintStyle: TextStyle(color: Colors.white)
@@ -83,7 +95,11 @@ class _EditSupplierPageState extends State<EditSupplierPage> {
               const SizedBox(height: 50,),
               GestureDetector(
                 onTap: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage()));
+                  widget.model.name=name.text;
+                  widget.model.phone=phone.text;
+                  widget.model.address=address.text;
+                  FirebaseDatabase.instance.ref("suppliers").child(widget.model.UID).set(widget.model.toMap()).then((value) =>
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=> SupplierPage())));
                 },
                 child: Container(
                   height: 50,

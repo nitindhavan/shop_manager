@@ -1,21 +1,40 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:shop_management/screens/add_product_screen.dart';
+import 'package:shop_management/models/BillModel.dart';
+import 'package:shop_management/screens/bill_screen.dart';
+import 'package:shop_management/screens/home_screen.dart';
 import 'package:shop_management/screens/invoice_screen.dart';
 
+import '../models/ItemModel.dart';
 import '../widgets/item.dart';
 
 class AddBillPage extends StatefulWidget {
-  const AddBillPage({super.key});
+  const AddBillPage({super.key,required this.userType,required this.uid});
 
+  final String userType;
+  final String uid;
   @override
   State<AddBillPage> createState() => _AddBillPageState();
 }
 
 class _AddBillPageState extends State<AddBillPage> {
   String currentBillType='Cash';
-  List<Widget> items=[Item()];
+  List<TextEditingController> nameControllers=[];
+  List<TextEditingController> quantityControllers=[];
+  List<TextEditingController> priceControllers=[];
+  List<Widget> items=[];
+  bool once=false;
   @override
   Widget build(BuildContext context) {
+    if(!once){
+      nameControllers.add(TextEditingController());
+      quantityControllers.add(TextEditingController());
+      priceControllers.add(TextEditingController());
+      int index=nameControllers.length-1;
+      items.add(Item(name: nameControllers[index], quantity: quantityControllers[index], price: priceControllers[index]));
+      once=true;
+    }
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -34,29 +53,43 @@ class _AddBillPageState extends State<AddBillPage> {
             ),
             Row(
               children: [
-                Expanded(child: Container(
-                  height: 60,
-                  padding: EdgeInsets.only(left: 16,right: 16),
-                  width: double.infinity,
-                  margin: EdgeInsets.only(left: 16,right: 16,top: 8,bottom: 8),
-                  decoration: BoxDecoration(
-                    color: currentBillType=='Cash' ? Colors.green : Colors.blue.shade200,
-                    borderRadius: BorderRadius.circular(16),
+                Expanded(child: GestureDetector(
+                  onTap: (){
+                    setState(() {
+                    currentBillType='Cash';
+                  });
+                    },
+                  child: Container(
+                    height: 60,
+                    padding: EdgeInsets.only(left: 16,right: 16),
+                    width: double.infinity,
+                    margin: EdgeInsets.only(left: 16,right: 16,top: 8,bottom: 8),
+                    decoration: BoxDecoration(
+                      color: currentBillType=='Cash' ? Colors.green : Colors.blue.shade200,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text('Cash',textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),),
                   ),
-                  alignment: Alignment.center,
-                  child: Text('Cash',textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),),
                 ),),
-                Expanded(child: Container(
-                  height: 60,
-                  padding: EdgeInsets.only(left: 16,right: 16),
-                  width: double.infinity,
-                  margin: EdgeInsets.only(left: 16,right: 16,top: 8,bottom: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade200,
-                    borderRadius: BorderRadius.circular(16),
+                Expanded(child: GestureDetector(
+                  onTap: (){
+                    setState(() {
+                      currentBillType='Credit';
+                    });
+                  },
+                  child: Container(
+                    height: 60,
+                    padding: EdgeInsets.only(left: 16,right: 16),
+                    width: double.infinity,
+                    margin: EdgeInsets.only(left: 16,right: 16,top: 8,bottom: 8),
+                    decoration: BoxDecoration(
+                      color: currentBillType=='Credit' ? Colors.green : Colors.blue.shade200,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text('Credit',textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),),
                   ),
-                  alignment: Alignment.center,
-                  child: Text('Credit',textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),),
                 ),),
               ],
             ),
@@ -70,7 +103,11 @@ class _AddBillPageState extends State<AddBillPage> {
                     GestureDetector(
                       onTap: (){
                         setState(() {
-                          items.add(Item());
+                          nameControllers.add(TextEditingController());
+                          quantityControllers.add(TextEditingController());
+                          priceControllers.add(TextEditingController());
+                          int index=nameControllers.length-1;
+                          items.add(Item(name: nameControllers[index], quantity: quantityControllers[index], price: priceControllers[index]));
                         });
                       },
                       child: Container(
@@ -91,7 +128,33 @@ class _AddBillPageState extends State<AddBillPage> {
               ),
             ),
             GestureDetector(
-              onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=> InvoicePage())),
+              onTap: (){
+                var ref=FirebaseDatabase.instance.ref('bills').child(FirebaseAuth.instance.currentUser!.uid);
+                String key=ref.push().key!;
+                List<Map> itemList=[];
+                int total=0;
+                for(int i=0; i< nameControllers.length;i++){
+                  String name=nameControllers[i].text;
+                  String quantityString=quantityControllers[i].text;
+                  String priceString=priceControllers[i].text;
+
+                  int quantity=0;
+                  int price=0;
+                  try{
+                    quantity=int.parse(quantityString);
+                    price= int.parse(priceString);
+                    ItemModel item=ItemModel(name, quantity, price);
+                    itemList.add(item.toMap());
+                    total+=quantity*price;
+                  }catch(e){
+                    print('not valid values');
+                  }
+                }
+                BillModel billModel=BillModel(key, widget.uid, DateTime.now().toIso8601String(), currentBillType, total, itemList,widget.userType);
+                ref.child(key).set(billModel.toMap()).then((value){
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=> BillPage(uid: widget.uid, type: widget.userType)));
+                });
+              },
               child: Container(
                 height: 60,
                 padding: EdgeInsets.only(left: 16,right: 16),
@@ -102,7 +165,7 @@ class _AddBillPageState extends State<AddBillPage> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 alignment: Alignment.center,
-                child: Text('Create Invoice',textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),),
+                child: Text('Create Bill',textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),),
               ),
             ),
           ],

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shop_management/models/UserModel.dart';
 import 'package:shop_management/screens/edit_profile.dart';
 import 'package:shop_management/screens/home_screen.dart';
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
-
+  ProfilePage({super.key, required this.model});
+  final UserModel model;
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -34,11 +35,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(32.0),
-                    child: Text('Name : \n\nUser name',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
+                    child: Text('Name : \n\n${widget.model.name}',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(32.0),
-                    child: Text('Shop Name : \n\nShop name here',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
+                    child: Text('Shop Name : \n\n${widget.model.shopName}',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
                   )
                 ],
               ),
@@ -46,7 +47,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
               GestureDetector(
                 onTap: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>EditProfilePage()));
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>EditProfilePage(model: widget.model)));
                 },
                 child: Container(
                   height: 50,
