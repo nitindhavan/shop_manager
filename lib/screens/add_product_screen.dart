@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:shop_management/models/ProductModel.dart';
-import 'package:shop_management/screens/home_screen.dart';
 import 'package:shop_management/screens/pricing_screen.dart';
 class RegisterProductPage extends StatefulWidget {
   const RegisterProductPage({super.key});

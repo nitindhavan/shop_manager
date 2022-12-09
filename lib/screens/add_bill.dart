@@ -3,8 +3,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:shop_management/models/BillModel.dart';
 import 'package:shop_management/screens/bill_screen.dart';
-import 'package:shop_management/screens/home_screen.dart';
-import 'package:shop_management/screens/invoice_screen.dart';
 
 import '../models/ItemModel.dart';
 import '../widgets/item.dart';

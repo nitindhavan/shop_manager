@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:shop_management/models/SupplierModel.dart';
-import 'package:shop_management/screens/home_screen.dart';
+import 'package:shop_management/models/CustomerModel.dart';
 import 'package:shop_management/screens/supplier_screen.dart';
 class RegisterSupplierPage extends StatefulWidget {
   const RegisterSupplierPage({super.key});
@@ -93,7 +92,7 @@ class _RegisterSupplierPageState extends State<RegisterSupplierPage> {
                 onTap: () async {
                   var ref=FirebaseDatabase.instance.ref("suppliers");
                   String key=ref.push().key!;
-                  ref.child(key).set(SupplierModel(key, name.text, phone.text, address.text, FirebaseAuth.instance.currentUser!.uid).toMap()).then((value) => Navigator.push(context, MaterialPageRoute(builder: (context)=> SupplierPage())));
+                  ref.child(key).set(CustomerModel(key, name.text, phone.text, address.text, FirebaseAuth.instance.currentUser!.uid).toMap()).then((value) => Navigator.push(context, MaterialPageRoute(builder: (context)=> SupplierPage())));
                 },
                 child: Container(
                   height: 50,

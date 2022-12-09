@@ -21,6 +21,7 @@ class _CustomerPageState extends State<CustomerPage> {
         this;
       });
     });
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -29,7 +30,7 @@ class _CustomerPageState extends State<CustomerPage> {
           children: <Widget>[
             Container(
               padding: EdgeInsets.all(16),
-              child: Text(
+              child: const Text(
                 'Customers',
                 style: TextStyle(
                     color: Colors.indigo,

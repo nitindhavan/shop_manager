@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:shop_management/models/SupplierModel.dart';
+import 'package:shop_management/models/CustomerModel.dart';
 import 'package:shop_management/screens/add_supplier_page.dart';
 import 'package:shop_management/screens/supplier_profile.dart';
 
@@ -63,9 +63,9 @@ class _SupplierPageState extends State<SupplierPage> {
             FutureBuilder(
               builder: (BuildContext context, AsyncSnapshot<DatabaseEvent> snapshot) {
                 if(!snapshot.hasData) return Expanded(child: Center(child: Text('no suppliers'),));
-                List<SupplierModel> supplierList=[];
+                List<CustomerModel> supplierList=[];
                 for(DataSnapshot snap in snapshot.data!.snapshot.children){
-                  SupplierModel model =SupplierModel.fromMap(snap.value as Map);
+                  CustomerModel model =CustomerModel.fromMap(snap.value as Map);
                   supplierList.add(model);
                 }
 

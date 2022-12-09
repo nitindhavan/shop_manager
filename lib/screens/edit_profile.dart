@@ -1,7 +1,6 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:shop_management/models/UserModel.dart';
-import 'package:shop_management/screens/home_screen.dart';
 import 'package:shop_management/screens/profile_screen.dart';
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key, required this.model});

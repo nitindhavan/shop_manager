@@ -1,13 +1,12 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:shop_management/screens/home_screen.dart';
 import 'package:shop_management/screens/supplier_screen.dart';
 
-import '../models/SupplierModel.dart';
+import '../models/CustomerModel.dart';
 class EditSupplierPage extends StatefulWidget {
   EditSupplierPage({super.key,required this.model});
 
-  final SupplierModel model;
+  final CustomerModel model;
 
   @override
   State<EditSupplierPage> createState() => _EditSupplierPageState();

@@ -1,6 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
-
 class ItemModel{
   String name;
   int quantity;
@@ -10,7 +7,7 @@ class ItemModel{
 
   ItemModel.fromMap(Map<dynamic, dynamic> map)
       : name = map['name'],
-        quantity=map['price'],
+        quantity=map['quantity'],
         price=map['price'];
 
   toMap() {

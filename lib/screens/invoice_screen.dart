@@ -1,14 +1,20 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:shop_management/screens/add_product_screen.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:flutter_share/flutter_share.dart';
 
 class InvoicePage extends StatefulWidget {
-  const InvoicePage({super.key});
+  const InvoicePage({super.key,required this.filePath});
 
+  final String filePath;
   @override
   State<InvoicePage> createState() => _InvoicePageState();
 }
 
 class _InvoicePageState extends State<InvoicePage> {
+  int pages=0;
+  final Completer<PDFViewController> _controller = Completer<PDFViewController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,10 +40,38 @@ class _InvoicePageState extends State<InvoicePage> {
                   color: Colors.blue.shade200,
                   borderRadius: BorderRadius.circular(20),
                 ),
+                child: PDFView(
+                  filePath: widget.filePath,
+                  enableSwipe: true,
+                  swipeHorizontal: true,
+                  autoSpacing: false,
+                  pageFling: false,
+                  onRender: (_pages) {
+                    setState(() {
+                      pages = _pages!;
+                      var isReady = true;
+                    });
+                  },
+                  onError: (error) {
+                    print(error.toString());
+                  },
+                  onPageError: (page, error) {
+                    print('$page: ${error.toString()}');
+                  },
+                  onViewCreated: (PDFViewController pdfViewController) {
+                    _controller.complete(pdfViewController);
+                  },
+                ),
               ),
             ),
             GestureDetector(
-              onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=> InvoicePage())),
+              onTap: () async {
+                  await FlutterShare.shareFile(
+                    title: 'Share Invoice',
+                    text: 'Share generated invoice',
+                    filePath: widget.filePath,
+                  );
+              },
               child: Container(
                 height: 60,
                 padding: EdgeInsets.only(left: 16,right: 16),

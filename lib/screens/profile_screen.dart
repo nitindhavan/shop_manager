@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shop_management/models/UserModel.dart';
 import 'package:shop_management/screens/edit_profile.dart';
-import 'package:shop_management/screens/home_screen.dart';
 class ProfilePage extends StatefulWidget {
   ProfilePage({super.key, required this.model});
   final UserModel model;

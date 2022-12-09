@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shop_management/screens/register_page.dart';
 
-import 'home_screen.dart';
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 

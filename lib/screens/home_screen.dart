@@ -1,9 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:shop_management/models/BillModel.dart';
 import 'package:shop_management/screens/customer_screen.dart';
 import 'package:shop_management/screens/pricing_screen.dart';
 import 'package:shop_management/screens/profile_screen.dart';
 import 'package:shop_management/screens/supplier_screen.dart';
-
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import 'package:intl/intl.dart';
 import '../models/UserModel.dart';
 
 class HomePage extends StatefulWidget {
@@ -15,6 +19,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  bool pickerVisible=false;
+  String _range='Select Date range';
+  DateTime startDate=DateTime.now().add(const Duration(days: -6));
+  DateTime endDate=DateTime.now();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,16 +50,40 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-              Container(
-                height: 50,
-                width: double.infinity,
-                margin: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.black12,
-                  borderRadius: BorderRadius.circular(16),
+              GestureDetector(
+                onTap: (){
+                  setState(() {
+                    pickerVisible=!pickerVisible;
+                  });
+                },
+                child: Container(
+                  height: 50,
+                  width: double.infinity,
+                  margin: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.black12,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Center(
+                    child: Text('${DateFormat('dd-MMM-yyyy').format(startDate)} -'
+                        ' ${DateFormat('dd-MMM-yyyy').format(endDate)}',style: TextStyle(fontWeight: FontWeight.bold),),
+                  ),
                 ),
-                child: Center(
-                  child: Text('Last 7 Days',style: TextStyle(fontWeight: FontWeight.bold),),
+              ),
+              if(pickerVisible)Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SfDateRangePicker(
+                  onSelectionChanged:(DateRangePickerSelectionChangedArgs args){
+                    if (args.value is PickerDateRange) {
+                      this.setState(() {
+                        var value =args.value as PickerDateRange;
+                        startDate=value.startDate!;
+                        endDate=value.endDate!;
+                      });
+
+                    }
+                  },
+                  selectionMode: DateRangePickerSelectionMode.range,
                 ),
               ),
               Container(
@@ -64,48 +96,75 @@ class _HomePageState extends State<HomePage> {
                       fontWeight: FontWeight.w900),
                 ),
               ),
-              Container(
-                margin: EdgeInsets.all(16),
-                height: 200,
-                decoration: BoxDecoration(
-              color: Colors.blue.shade200,
-              borderRadius: BorderRadius.circular(30),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          SizedBox(height: 16,),
-                          Text('Credit',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
-                          Text('2,00,000',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24),),
-                          Text('Cash',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
-                          Text('2,00,000',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24),),
-                          SizedBox(height: 16,),
-                        ],
+              StreamBuilder(key: Key(startDate.toString()+endDate.toString()+"a"),builder: (BuildContext context, AsyncSnapshot<DatabaseEvent> snapshot) {
+                if(!snapshot.hasData) return Container(
+                  margin: EdgeInsets.all(16),
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade200,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Center(child: CircularProgressIndicator(color: Colors.white,),),
+                );
+
+                int cash=0;
+                int credit=0;
+                for(DataSnapshot snap in snapshot.data!.snapshot.children){
+                  BillModel model=BillModel.fromMap(snap.value as Map);
+                  DateTime date=DateTime.parse(model.date);
+                 if(compareRange(date, startDate, endDate)) {
+                    if (model.type == 'Cash') {
+                      cash += model.total;
+                    } else {
+                      credit += model.total;
+                    }
+                  }
+                }
+
+
+                return Container(
+                  margin: EdgeInsets.all(16),
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade200,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            const SizedBox(height: 16,),
+                            const Text('Credit',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
+                            Text('$credit',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24),),
+                            const Text('Cash',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
+                            Text('$cash',style: const TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24),),
+                            const SizedBox(height: 16,),
+                          ],
+                        ),
                       ),
-                    ),
-                    Container(
-                      color: Colors.white,
-                      width: 2,
-                      margin: EdgeInsets.only(top: 16,bottom: 16),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Text('Total',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
-                          Text('4,00,000',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24),),
-                        ],
+                      Container(
+                        color: Colors.white,
+                        width: 2,
+                        margin: EdgeInsets.only(top: 16,bottom: 16),
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            const Text('Total',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
+                            Text('${cash+credit}',style: const TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24),),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },stream: FirebaseDatabase.instance.ref('bills').child(FirebaseAuth.instance.currentUser!.uid).orderByChild('userType').equalTo('suppliers').onValue),
               Container(
                 padding: EdgeInsets.all(16),
                 child: Text(
@@ -116,48 +175,76 @@ class _HomePageState extends State<HomePage> {
                       fontWeight: FontWeight.w900),
                 ),
               ),
-              Container(
-                margin: EdgeInsets.all(16),
-                height: 200,
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade200,
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          SizedBox(height: 16,),
-                          Text('Credit',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
-                          Text('2,00,000',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24),),
-                          Text('Cash',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
-                          Text('2,00,000',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24),),
-                          SizedBox(height: 16,),
-                        ],
+              StreamBuilder(key: Key(startDate.toString()+endDate.toString()),builder: (BuildContext context, AsyncSnapshot<DatabaseEvent> snapshot) {
+                if(!snapshot.hasData) {
+                  return Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade200,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: const Center(child: CircularProgressIndicator(color: Colors.white,),),
+                );
+                }
+
+                int cash=0;
+                int credit=0;
+                for(DataSnapshot snap in snapshot.data!.snapshot.children){
+                  BillModel model=BillModel.fromMap(snap.value as Map);
+                  DateTime date=DateTime.parse(model.date);
+                 if(compareRange(date, startDate, endDate)) {
+                    if (model.type == 'Cash') {
+                      cash += model.total;
+                    } else {
+                      credit += model.total;
+                    }
+                  }
+                }
+
+
+                return Container(
+                  margin: EdgeInsets.all(16),
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade200,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            const SizedBox(height: 16,),
+                            const Text('Credit',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
+                            Text('$credit',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24),),
+                            const Text('Cash',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
+                            Text('$cash',style: const TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24),),
+                            const SizedBox(height: 16,),
+                          ],
+                        ),
                       ),
-                    ),
-                    Container(
-                      color: Colors.white,
-                      width: 2,
-                      margin: EdgeInsets.only(top: 16,bottom: 16),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Text('Total',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
-                          Text('4,00,000',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24),),
-                        ],
+                      Container(
+                        color: Colors.white,
+                        width: 2,
+                        margin: EdgeInsets.only(top: 16,bottom: 16),
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            const Text('Total',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 16),),
+                            Text('${cash+credit}',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24),),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },stream: FirebaseDatabase.instance.ref('bills').child(FirebaseAuth.instance.currentUser!.uid).orderByChild('userType').equalTo('customers').onValue),
               GestureDetector(
                 onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=> SupplierPage())),
                 child: Container(
@@ -170,7 +257,7 @@ class _HomePageState extends State<HomePage> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   alignment: Alignment.centerLeft,
-                  child: Text('View Suppliers',textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold),),
+                  child: const Text('View Suppliers',textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold),),
                 ),
               ),
               GestureDetector(
@@ -185,7 +272,7 @@ class _HomePageState extends State<HomePage> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   alignment: Alignment.centerLeft,
-                  child: Text('View Customers',textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold),),
+                  child: const Text('View Customers',textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold),),
                 ),
               ),
               GestureDetector(
@@ -200,7 +287,7 @@ class _HomePageState extends State<HomePage> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   alignment: Alignment.centerLeft,
-                  child: Text('View Pricing',textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold),),
+                  child: const Text('View Pricing',textAlign: TextAlign.start,style: TextStyle(fontWeight: FontWeight.bold),),
                 ),
               ),
             ],
@@ -208,5 +295,12 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+  bool compareRange(DateTime date,DateTime startDate,DateTime endDate){
+    DateTime start=DateTime(startDate.year,startDate.month,startDate.day);
+    DateTime end=DateTime(endDate.year,endDate.month,endDate.day);
+    DateTime newDate=DateTime(date.year,date.month,date.day);
+    return (newDate.isAfter(start)|| newDate.isAtSameMomentAs(start)) && (newDate.isBefore(end)|| newDate.isAtSameMomentAs(end));
+
   }
 }

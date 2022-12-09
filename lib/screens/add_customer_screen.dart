@@ -3,7 +3,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:shop_management/models/CustomerModel.dart';
 import 'package:shop_management/screens/customer_screen.dart';
-import 'package:shop_management/screens/home_screen.dart';
 class RegisterCustomerPage extends StatefulWidget {
   const RegisterCustomerPage({super.key});
 

@@ -6,8 +6,6 @@ import 'package:shop_management/models/CustomerModel.dart';
 import 'package:shop_management/screens/add_bill.dart';
 import 'package:shop_management/screens/bill_screen.dart';
 import 'package:shop_management/screens/edit_customer.dart';
-import 'package:shop_management/screens/edit_profile.dart';
-import 'package:shop_management/screens/home_screen.dart';
 class CustomerProfilePage extends StatefulWidget {
   const CustomerProfilePage({super.key, required this.model});
 
@@ -55,8 +53,17 @@ class _CustomerProfilePageState extends State<CustomerProfilePage> {
               ),
               FutureBuilder(
                 builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                  if (!snapshot.hasData)
-                    return Center(child: CircularProgressIndicator(),);
+                  if(!snapshot.hasData) {
+                    return Container(
+                    margin: EdgeInsets.all(16),
+                    height: 200,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade200,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Center(child: CircularProgressIndicator(color: Colors.white,),),
+                  );
+                  }
                   int creditTotal = 0;
                   int cashTotal = 0;
 
